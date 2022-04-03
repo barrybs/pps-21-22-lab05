@@ -84,8 +84,7 @@ enum List[A]:
     case h :: Nil() => h
     case h :: t => op(h,t.reduce(op))
     case Nil() => throw new UnsupportedOperationException()
-
-
+  
   def takeRight(n: Int): List[A] = this.reverse() match
     case h :: t if n>0 => t.reverse().takeRight(n-1).append(h :: Nil())
     case _ => Nil()
