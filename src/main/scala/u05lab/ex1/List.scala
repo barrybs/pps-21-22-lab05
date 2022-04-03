@@ -59,16 +59,41 @@ enum List[A]:
   def reverse(): List[A] = foldLeft[List[A]](Nil())((l, e) => e :: l)
 
   /** EXERCISES */
-  def zipRight: List[(A, Int)] = ???
+  def zipRight: List[(A, Int)] =
+    val i=Iterator.from(0)
+    this.map((_,i.next))
 
-  def partition(pred: A => Boolean): (List[A], List[A]) = ???
+  def partition(pred: A => Boolean): (List[A], List[A]) =
+    (this.filter(pred), this.filter(!pred(_)))
 
-  def span(pred: A => Boolean): (List[A], List[A]) = ???
+  def partition2(pred: A => Boolean): (List[A], List[A]) =
+    foldLeft ( (List[A](),List[A]()) ) ((lists,h) => (lists, pred(h)) match
+      case ((a,b), true) => (a.append(h :: Nil()),b)
+      case ((a,b), false) => (a, b.append(h :: Nil()))
+  )
+
+  def span(pred: A => Boolean): (List[A], List[A]) =
+    foldLeft ((List[A](),List[A]())) ((lists,he) => (lists, pred(he)) match
+      case ((a, h::t), _) => (a, h :: t.append(he :: Nil()))
+      case ((a,Nil()), true) => (a.append(he :: Nil()), Nil())
+      case ((a,Nil()), false) => (a,he::Nil())
+    )
 
   /** @throws UnsupportedOperationException if the list is empty */
-  def reduce(op: (A, A) => A): A = ???
+  def reduce(op: (A,A)=>A): A = this match
+    case h :: Nil() => h
+    case h :: t => op(h,t.reduce(op))
+    case Nil() => throw new UnsupportedOperationException()
 
-  def takeRight(n: Int): List[A] = ???
+
+  def takeRight(n: Int): List[A] = this.reverse() match
+    case h :: t if n>0 => t.reverse().takeRight(n-1).append(h :: Nil())
+    case _ => Nil()
+
+  def collect[B](f: PartialFunction[A,B]): List[B] = this match
+    case h :: t if f.isDefinedAt(h) => f(h) :: (t collect f)
+    case _ :: t => t collect f
+    case _ => Nil()
 
 // Factories
 object List:
@@ -92,3 +117,4 @@ object List:
   catch case ex: Exception => println(ex) // prints exception
   println(List(10).reduce(_ + _)) // 10
   println(reference.takeRight(3)) // List(2, 3, 4)
+  println(reference.collect { case x if x<1 || x>3 => x-1 }) // Cons(9, Cons(39, Nil()))
