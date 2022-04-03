@@ -33,5 +33,4 @@ class ListTest {
   def testCollect() : Unit =
     assertEquals(List(9,39), l.collect{ case x if x<15 || x>30 => x-1 })
 
-  //def testCollect(): Unit =
 }
